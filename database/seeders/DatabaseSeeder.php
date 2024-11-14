@@ -1,10 +1,11 @@
 <?php
 
-namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Models\Department;
+namespace Database\Seeders;
+
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,14 +15,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Temporarily disable foreign key checks
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        \App\Models\User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'is_admin' => true
-        ]);
+        // Truncate the users table to delete all existing users
+        User::truncate();
 
+        // Check if the admin user already exists
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'], // Condition: Check if email exists
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'password' => bcrypt('password'), // Ensure a default password is set
+                'is_admin' => true, // Admin flag
+            ]
+        );
+
+        // Re-enable foreign key checks
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Call other seeders
         $this->call(CountrySeeder::class);
         $this->call(StateSeeder::class);
         $this->call(CitySeeder::class);
